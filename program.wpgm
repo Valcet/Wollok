@@ -1,0 +1,65 @@
+import personajes.*
+import enemigos.*
+import wollok.game.*
+import colisiones.*
+import puerta.*
+program juego{
+	game.title("Survival")
+	game.height(18)
+	game.width(20)
+	const fondo = "pasto.png"
+	game.ground(fondo)
+	game.addVisual(personaje)
+	
+	game.addVisual(caja)
+ 	game.cellSize(50)
+ 	const visuales = [fondo, personaje, caja]
+	const ancho = 19
+	const largo = 17
+	var ultimo_movimineto
+	var caja_y = 10
+	var caja_x = 10
+	const puerta1 = new Puertas(id = 1, y = 13, x = 13)
+	const puerta2 = new Puertas(id = 2, y = 10, x = 18)
+	const puerta3 = new Puertas(id = 3, y = 18, x = 18)
+	
+	
+	game.addVisual(puerta1)
+	
+	game.whenCollideDo(personaje,{elemento => game.say(elemento, "la concha de tu madre")
+		if (ultimo_movimineto == "w" and caja_y != largo){elemento.mover_arriba() caja_y += 1 
+		}else if(ultimo_movimineto == "s" and caja_y != 0){elemento.mover_abajo() caja_y -= 1
+		}else if(ultimo_movimineto == "a" and caja_x != 0){elemento.mover_izquierda() caja_x -= 1
+		}else if(ultimo_movimineto == "d" and caja_x != ancho){elemento.mover_derecha() caja_x += 1}
+	})
+	var data
+	var personaje_y
+	var personaje_x
+	keyboard.i().onPressDo {game.say(personaje, "x" + personaje_x + " y" + personaje_y)}
+	keyboard.w().onPressDo {personaje_y = personaje.devolver_y() if ((personaje_y != largo and caja_y != largo and personaje_y + 1 != caja_y and personaje_x != caja_x) or not(caja_y == largo and personaje_y + 1 == caja_y and personaje_x == caja_x) and personaje_y != largo){personaje.mover_arriba() personaje_y += 1 personaje.cambiar_perspectiva()}}
+	keyboard.s().onPressDo {personaje_y = personaje.devolver_y() if ((personaje_y != 0 and caja_y != 0 and personaje_y - 1 != caja_y and personaje_x != caja_x) or not(caja_y == 0 and personaje_y - 1 == caja_y and personaje_x == caja_x) and personaje_y != 0){personaje.mover_abajo() personaje_y -= 1 personaje.cambiar_perspectiva()}}
+	keyboard.a().onPressDo {personaje_x = personaje.devolver_x() if ((personaje_x != 0 and caja_x != 0 and personaje_x - 1 != caja_x and personaje_y != caja_y) or not(caja_x == 0 and personaje_x - 1 == caja_x and personaje_y == caja_y) and personaje_x != 0){personaje.mover_izquierda() personaje_x -= 1 personaje.cambiar_perspectiva()}}
+	keyboard.d().onPressDo {personaje_x = personaje.devolver_x() if ((personaje_x != ancho and caja_x != ancho and personaje_x + 1 != caja_x and personaje_y != caja_y) or not (caja_x == ancho and personaje_x + 1 == caja_x and personaje_y == caja_y) and personaje_x != ancho){personaje.mover_derecha() personaje_x += 1 personaje.cambiar_perspectiva()}}
+
+	
+	game.onTick(5000, "enemigo", {enemigos.seguir(personaje_x, personaje_y)})
+	game.whenCollideDo(enemigos, {personaje_ => data = personaje_.recibir_danio(enemigos.devolver_ultimo_movimiento()) if(data == 0){visuales.forEach{visual => game.removeVisual(visual)} game.ground("ay.png")}
+		else if (data > 0){game.removeVisual(personaje) personaje.nueva_vida() game.addVisual(personaje)
+		}else if(personaje_x == ancho or personaje_x == 0 or personaje_y == largo or personaje_y == 0){personaje.recibir_danio2(enemigos.devolver_ultimo_movimiento())
+		}else{
+		if(enemigos.devolver_ultimo_movimiento() == "arriba"){personaje_y += 2
+		}else if(enemigos.devolver_ultimo_movimiento() == "abajo"){personaje_y -= 2
+	    }else if(enemigos.devolver_ultimo_movimiento() == "derecha"){personaje_x += 2
+		}else if(enemigos.devolver_ultimo_movimiento() == "izquierda"){personaje_x -= 2}
+	}})
+	game.schedule(4000, game.addVisual(enemigos))
+	keyboard.t().onPressDo(personaje.disparar())
+	/*game.whenCollideDo(enemigos, {personaje_ => if (personaje_x + 1 > ancho or personaje_x - 1 < 0 or personaje_y + 1 > largo or personaje_y - 1 < 0){personaje.recibir_danio2(enemigos.devolver_ultimo_movimiento())}
+		{personaje_.recibir_danio(enemigos.devolver_ultimo_movimiento())
+		if(enemigos.devolver_ultimo_movimiento() == "arriba"){personaje_y += 2
+		}else if(enemigos.devolver_ultimo_movimiento() == "abajo"){personaje_y -= 2	
+		}else if(enemigos.devolver_ultimo_movimiento() == "derecha"){personaje_x += 2
+		}else if(enemigos.devolver_ultimo_movimiento() == "izquierda"){personaje_x -= 2}
+	}})*/
+	game.start()
+}
