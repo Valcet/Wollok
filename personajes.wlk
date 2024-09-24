@@ -28,9 +28,6 @@ object personaje{
 	}
 	method vidas_totales(){
 		vidas -= 1
-		if (vidas == 0){
-			const set = #{2, 3}
-		}
 		return vidas
 	}
 	
